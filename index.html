@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سامانه هوشمند عربی نهم</title>
+<style>
+:root{--primary:#2c3e50;--accent:#27ae60;--secondary:#3498db;--bg:#f0f4f8;--card:#fff;--text:#333;--line:#e3e8ee;--soft:#f1f8f4;--bad:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--primary:#1f2d3a;--bg:#12181f;--card:#1b242d;--text:#e6ebf0;--line:#2c3945;--soft:#1f2e27;--bad:#ff7b6b}}
+*{box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+body{background:var(--bg);color:var(--text);margin:0;padding:16px;line-height:1.7}
+.container{max-width:800px;margin:0 auto}
+header{background:linear-gradient(135deg,var(--primary),#34495e);color:#fff;text-align:center;padding:24px;border-radius:20px;margin-bottom:20px}
+header h1{margin:0 0 6px;font-size:24px}header p{margin:0;font-size:14px;opacity:.9}
+.section{background:var(--card);padding:20px;border-radius:20px;margin-bottom:20px;box-shadow:0 6px 16px rgba(0,0,0,.06)}
+h2{margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line);font-size:19px}
+h3{margin:14px 0 8px;font-size:16px}
+input,select,textarea{width:100%;padding:12px;border:2px solid var(--line);border-radius:12px;font-size:16px;margin-bottom:8px;background:var(--bg);color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+button{width:100%;padding:12px;border:none;border-radius:12px;cursor:pointer;font-weight:bold;font-size:16px;color:#fff;margin-bottom:8px;background:var(--accent)}
+button.b2{background:var(--secondary)}button.b3{background:var(--primary)}button.del{background:var(--bad);width:auto;padding:4px 12px;font-size:13px;margin:0}
+.result{padding:12px;border-radius:12px;background:var(--bg);border-right:5px solid var(--accent);min-height:46px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:10px}
+.card{background:var(--soft);padding:10px;border-radius:10px;text-align:center;border:1px solid var(--line);font-size:14px}
+.card b{color:var(--accent);display:block;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qbox{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px}
+.qbox label{display:block;padding:6px 0;cursor:pointer}.qbox input[type=radio]{width:auto;margin:0 0 0 8px}
+.ok{color:var(--accent);font-weight:bold}.no{color:var(--bad);font-weight:bold}
+.muted{color:#7f8c8d;font-size:13px}
+.lessons{display:flex;flex-wrap:wrap;gap:8px}.lessons span{padding:6px 14px;border-radius:20px;background:var(--soft);border:1px solid var(--line);font-size:14px}
+.lessons .soon{opacity:.5;border-style:dashed}
+.teacher{border:2px solid var(--secondary)}
+footer{text-align:center;padding:16px;color:#7f8c8d;font-size:14px}
+</style>
+</head>
+<body>
+<div class="container">
+<header><h1>🎓 سامانه هوشمند عربی</h1><p>پایه نهم | مدیریت: محمد حسین نجفی | امیر صادق نصراللهی</p></header>
+
+<div class="section"><h2>📚 درس‌ها</h2>
+<div class="lessons"><span>✅ درس ۱</span><span>✅ درس ۲</span><span class="soon">درس ۳ — به‌زودی</span><span class="soon">درس ۴ — به‌زودی</span><span class="soon">...</span></div>
+<p class="muted">در حال حاضر درس ۱ و ۲ موجود است. به‌مرور تمام درس‌ها اضافه می‌شوند.</p></div>
+
+<div class="section"><h2>📖 لغت‌نامه جامع (درس ۱ و ۲)</h2>
+<input id="wordInput" placeholder="کلمه یا عبارت را بنویس (مثلاً: رصیف، بکاء، صعاب)">
+<button onclick="searchWord()">جستجو در لغات</button>
+<div id="wordResult" class="result">نتیجه در اینجا ظاهر می‌شود...</div></div>
+
+<div class="section"><h2>🔍 تحلیل هوشمند فعل</h2>
+<input id="verbInput" placeholder="فعل را وارد کنید (مثلاً: سأل، حذر، رقد)">
+<button class="b2" onclick="analyzeVerb()">استخراج اطلاعات</button>
+<div id="verbResult" class="grid"></div></div>
+
+<div class="section"><h2>💬 دستیار هوشمند</h2>
+<input id="chatInput" placeholder="سوال بپرس (مثلاً: فعل مزارع چیست؟)">
+<button class="b3" onclick="askAI()">ارسال سوال</button>
+<div id="chatResult" class="result">منتظر سوال شما...</div></div>
+
+<div class="section"><h2>📝 آزمون</h2>
+<select id="examSel" onchange="renderExam()"></select>
+<div id="examBox"></div></div>
+
+<div id="lockBox" class="section teacher" style="display:none"><h2>🔒 ورود معلم</h2><p id="lockHint" class="muted"></p><input id="pw" type="password" placeholder="رمز پنل معلم"><button onclick="unlock()">ورود</button><div id="lockMsg" class="no"></div></div>
+
+<div id="teacherPanel" class="section teacher" style="display:none"><h2>👨‍🏫 پنل معلم</h2>
+<p class="muted">هر تغییری اینجا بدهید، بلافاصله برای دانش‌آموزان هم نمایش داده می‌شود.</p>
+
+<h3>➕ افزودن لغت / معنی</h3>
+<input id="tK" placeholder="کلمه (عربی)"><input id="tM" placeholder="معنی">
+<div class="two"><select id="tT"><option>اسم</option><option>فعل ماضی</option><option>فعل مضارع</option><option>فعل امر</option><option>صفت</option><option>عبارت</option><option>حرف</option></select>
+<input id="tL" type="number" min="1" placeholder="شماره درس" value="1"></div>
+<div class="two"><input id="tW" placeholder="وزن (مثلاً فَعَلَ)"><input id="tN" placeholder="مضارع / اطلاعات"></div>
+<button onclick="addWord()">ذخیره لغت</button>
+<div id="tWords"></div>
+
+<h3>💬 افزودن سوال و جواب</h3>
+<input id="qQ" placeholder="سوال"><textarea id="qA" rows="3" placeholder="جواب"></textarea>
+<button onclick="addQA()">ذخیره سوال و جواب</button>
+<div id="tQA"></div>
+
+<h3>📝 ساخت آزمون</h3>
+<input id="eT" placeholder="عنوان آزمون (مثلاً: آزمون درس ۱)">
+<div class="qbox"><input id="eQ" placeholder="متن سوال">
+<input id="o0" placeholder="گزینه ۱"><input id="o1" placeholder="گزینه ۲"><input id="o2" placeholder="گزینه ۳"><input id="o3" placeholder="گزینه ۴">
+<select id="eC"><option value="0">پاسخ درست: گزینه ۱</option><option value="1">پاسخ درست: گزینه ۲</option><option value="2">پاسخ درست: گزینه ۳</option><option value="3">پاسخ درست: گزینه ۴</option></select>
+<button class="b2" onclick="addExamQ()">افزودن سوال به آزمون</button></div>
+<div id="draft" class="muted">هنوز سوالی اضافه نشده.</div>
+<button onclick="saveExam()">انتشار آزمون برای دانش‌آموزان</button>
+<div id="tExams"></div>
+<div id="tMsg" class="muted"></div></div>
+
+<footer><p>طراحی شده برای ارائه به استاد گرامی: <strong>آقای عابدینی</strong></p><p>تهیه کننده: <strong>محمد حسین نجفی | امیر صادق نصراللهی</strong></p></footer>
+</div>
+
+<script>
+function norm(t){return (t||"").replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ة/g,"ه").replace(/[يىئ]/g,"ی").replace(/ك/g,"ک").replace(/ؤ/g,"و").replace(/\s+/g," ").trim()}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+const $=id=>document.getElementById(id);
+
+const rawDictionary={
+"آمِن": { m: "ایمن", t: "اسم/صفت", w: "-", n: "-" },
+"الْعُبورُ الْآمِنُ": { m: "عبور و مرور ایمن", t: "عبارت", w: "-", n: "-" },
+"سَأَلَ": { m: "درخواست کرد، پرسید", t: "فعل ماضی", w: "فَعَلَ", n: "يَسْأَلُ" },
+"ابِتدَأَ": { m: "شروع شد", t: "فعل ماضی", w: "افْتَعَلَ", n: "يَبْتَدِئُ" },
+"صِعاب": { m: "سختی‌ها (مفرد: صَعْب)", t: "اسم (جمع)", w: "-", n: "-" },
+"صَعْب": { m: "سخت", t: "اسم/صفت", w: "-", n: "-" },
+"بِنَیْن": { m: "پسران", t: "اسم (جمع)", w: "-", n: "-" },
+"عَام": { m: "سال", t: "اسم", w: "-", n: "-" },
+"عَامٌ دِراسیٌّ": { m: "سال تحصیلی", t: "عبارت", w: "-", n: "-" },
+"تَخَرَّجَ": { m: "دانش‌آموخته شد", t: "فعل ماضی", w: "تَفَعَّلَ", n: "يَتَخَرَّجُ" },
+"قِیَام": { m: "برخاستن", t: "اسم", w: "-", n: "-" },
+"تَلامیذ": { m: "دانش‌آموزان (مفرد: تِلْمِیذ)", t: "اسم (جمع)", w: "-", n: "-" },
+"تِلْمِیذ": { m: "دانش‌آموز", t: "اسم", w: "-", n: "-" },
+"مَمَرُّ الْمُشاهِ": { m: "گذرگاه پیاده (مُشاه یعنی پیادگان و جمعِ ماشی)", t: "عبارت", w: "-", n: "-" },
+"مُشاه": { m: "پیادگان (جمع ماشی)", t: "اسم (جمع)", w: "-", n: "-" },
+"دِراسَه": { m: "تحصیل، درس خواندن", t: "اسم", w: "-", n: "-" },
+"دِراسیّ": { m: "تحصیلی", t: "صفت", w: "-", n: "-" },
+"مِنطَقَهُ تَعلیمِ الْمُرورِ": { m: "پارک آموزش ترافیک", t: "عبارت", w: "-", n: "-" },
+"دَرَّسَ": { m: "درس داد", t: "فعل ماضی", w: "فَعَّلَ", n: "يُدَرِّسُ" },
+"ها": { m: "هان", t: "حرف", w: "-", n: "-" },
+"رَصیف": { m: "پیاده‌رو", t: "اسم", w: "-", n: "-" },
+"یُحَذِّرُ": { m: "هشدار می‌دهد", t: "فعل مضارع", w: "يُفَعِّلُ", n: "يُحَذِّرُ" },
+"حَذَّرَ": { m: "هشدار داد", t: "فعل ماضی", w: "فَعَّلَ", n: "يُحَذِّرُ" },
+"زادَ": { m: "زیاد کرد، زیاد شد", t: "فعل ماضی", w: "فَعَلَ", n: "يَزیدُ" },
+"یَمْشونَ": { m: "راه می‌روند", t: "فعل مضارع", w: "يَفْعُلونَ", n: "يَمْشونَ" },
+"مَشی": { m: "راه رفت", t: "فعل ماضی", w: "فَعَلَ", n: "يَمْشی" },
+"آمَنَ": { m: "ایمان آورد", t: "فعل ماضی", w: "أَفْعَلَ", n: "يُؤْمِنُ" },
+"شَقاوَه": { m: "بدبختی", t: "اسم", w: "-", n: "-" },
+"أَحَبّ": { m: "محبوب‌ترین / دوست داشتنی‌تر", t: "اسم/صفت", w: "أَفْعَل", n: "-" },
+"صَحیفَه": { m: "روزنامه", t: "اسم", w: "-", n: "-" },
+"صُحُف": { m: "روزنامه‌ها (جمع صحیفه)", t: "اسم (جمع)", w: "-", n: "-" },
+"صَحیفَه جِداریَّه": { m: "روزنامه دیواری", t: "عبارت", w: "-", n: "-" },
+"إِشاراتُ الْمُرورِ": { m: "علامت‌های راهنمایی و رانندگی", t: "عبارت", w: "-", n: "-" },
+"صَدَمَ": { m: "برخورد کرد", t: "فعل ماضی", w: "فَعَلَ", n: "يَصْدِمُ" },
+"أَنْصَح": { m: "اندرزگوترین", t: "اسم/صفت", w: "أَفْعَل", n: "-" },
+"فَجْأَهً": { m: "ناگهان", t: "قید", w: "-", n: "-" },
+"بُکاء": { m: "گریه کردن، گریه", t: "اسم", w: "-", n: "-" },
+"قُبْح": { m: "شتی", t: "اسم", w: "-", n: "-" },
+"تالی": { m: "بعدی", t: "اسم/صفت", w: "-", n: "-" },
+"اَلْیَومُ التّالی": { m: "روز بعد", t: "عبارت", w: "-", n: "-" },
+"لَقَدْ": { m: "قطعاً", t: "حرف تحقیق", w: "-", n: "-" },
+"تَکَلَّمَ": { m: "صحبت کرد", t: "فعل ماضی", w: "تَفَعَّلَ", n: "يَتَکَلَّمُ" },
+"لِمَ": { m: "برای چه (لِ + ما)", t: "اسم استفهام", w: "-", n: "-" },
+"ذَکیّ": { m: "باهوش", t: "صفت", w: "-", n: "-" },
+"ما": { m: "آنچه", t: "اسم موصول", w: "-", n: "-" },
+"رَقَدَ": { m: "بستری شد، خوابید", t: "فعل ماضی", w: "فَعَلَ", n: "يَرْقُدُ" },
+"نادَی": { m: "صدا زد", t: "فعل ماضی", w: "فاعَلَ", n: "يُنادی" },
+"سَتَرَ": { m: "پوشاند، پنهان کرد", t: "فعل ماضی", w: "فَعَلَ", n: "يَسْتُرُ" },
+"هادِئ": { m: "آرام", t: "صفت", w: "-", n: "-" }
+};
+const baseQA=[
+{q:"فعل مضارع چیست؟",a:"فعل مضارع کاری را نشان می‌دهد که در زمان حال یا آینده انجام می‌شود. مضارع با یکی از حروف «أ، ن، ی، ت» (أَنَيْتَ) شروع می‌شود؛ مثل: يَكْتُبُ، تَكْتُبُ، أَكْتُبُ، نَكْتُبُ."},
+{q:"فعل ماضی چیست؟",a:"فعل ماضی برای نشان دادن کاری است که در زمان گذشته انجام شده؛ مثل: كَتَبَ (نوشت)، سَأَلَ (پرسید)."},
+{q:"نحوه پیدا کردن وزن فعل",a:"۱) حروف اضافه (غیر اصلی) فعل را جدا کن تا فقط ۳ حرف اصلی بماند. ۲) به‌جای حرف اول اصلی «ف»، دومی «ع» و سومی «ل» بگذار. ۳) حروف اضافه و حرکات را همان‌طور که هست نگه دار. مثال: كَتَبَ ← فَعَلَ، تَخَرَّجَ ← تَفَعَّلَ، دَرَّسَ ← فَعَّلَ (حرف مشدد = حرف وسط، ع)، آمَنَ ← أَفْعَلَ، نادَى ← فاعَلَ، ابْتَدَأَ ← افْتَعَلَ."}
+];
+
+let dbWords={},dbQA=[],dbExams=[],draft=[];
+let dict={};
+function rebuild(){dict={};for(const k in rawDictionary)dict[norm(k)]={...rawDictionary[k],k};for(const w of Object.values(dbWords))dict[norm(w.k)]={m:w.m,t:w.t||"-",w:w.w||"-",n:w.n||"-",k:w.k}}
+rebuild();
+
+function searchWord(){
+const i=$("wordInput").value,r=$("wordResult"),f=dict[norm(i)];
+if(!norm(i)){r.textContent="⚠️ لطفاً کلمه‌ای وارد کنید.";return}
+r.innerHTML=f?`<b style="color:var(--accent)">معنی:</b> ${esc(f.m)}<br><b style="color:var(--accent)">نوع:</b> ${esc(f.t)}<br><b style="color:var(--accent)">مضارع/اطلاعات:</b> ${esc(f.n)}`:`❌ کلمه <b class="no">"${esc(i)}"</b> در لغات یافت نشد.`}
+
+function analyzeVerb(){
+const i=$("verbInput").value,r=$("verbResult"),f=dict[norm(i)];
+if(f&&f.t.includes("فعل")){r.innerHTML=[["نوع",f.t],["وزن",f.w],["معادل/مضارع",f.n],["معنی",f.m]].map(x=>`<div class="card"><b>${x[0]}</b>${esc(x[1])}</div>`).join("")}
+else r.innerHTML="<p style='grid-column:1/-1' class='no'>فعل مورد نظر در دیتابیس یافت نشد.</p>"}
+
+function askAI(){
+const raw=$("chatInput").value,q=norm(raw),c=$("chatResult");
+if(!q){c.textContent="⚠️ سوال را بنویس.";return}
+const toks=q.split(" ").filter(t=>t.length>1&&!["چیست","چی","است","را","از","به","و","در"].includes(t));
+let best=null,bs=0;
+for(const x of [...dbQA,...baseQA]){const n=norm(x.q);let s=n===q?100:0;toks.forEach(t=>{if(n.includes(t))s++});if(s>bs){bs=s;best=x}}
+if(best&&bs>=Math.max(1,Math.ceil(toks.length/2)))c.innerHTML=`<b>پاسخ:</b> ${esc(best.a)}`;
+else if(q.includes("سلام"))c.textContent="سلام! سامانه آماده است.";
+else c.textContent="پاسخ این سوال هنوز ثبت نشده. از معلم بخواه آن را اضافه کند."}
+
+function renderExam(){
+const sel=$("examSel"),box=$("examBox");
+if(!dbExams.length){box.innerHTML='<p class="muted">فعلاً آزمونی منتشر نشده است.</p>';return}
+const ex=dbExams.find(e=>e.id===sel.value)||dbExams[0];
+box.innerHTML=ex.questions.map((q,i)=>`<div class="qbox"><b>${i+1}. ${esc(q.q)}</b>`+q.opts.map((o,j)=>`<label><input type="radio" name="q${i}" value="${j}">${esc(o)}</label>`).join("")+`</div>`).join("")+`<button onclick="gradeExam()">ثبت پاسخ‌ها</button><div id="examScore"></div>`}
+function gradeExam(){
+const ex=dbExams.find(e=>e.id===$("examSel").value)||dbExams[0];let ok=0;
+ex.questions.forEach((q,i)=>{const s=document.querySelector(`input[name=q${i}]:checked`);if(s&&+s.value===q.ans)ok++});
+$("examScore").innerHTML=`<p class="ok">نمره شما: ${ok} از ${ex.questions.length}</p>`;
+}
+function fillExamSel(){
+const sel=$("examSel"),cur=sel.value;
+sel.style.display=dbExams.length?"":"none";
+sel.innerHTML=dbExams.map(e=>`<option value="${esc(e.id)}">${esc(e.title)}</option>`).join("");
+if(dbExams.some(e=>e.id===cur))sel.value=cur;renderExam()}
+
+/* ---------- پنل معلم ---------- */
+let DB=null,pwHash=null;
+async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("arabic9|"+s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function unlock(){
+const p=$("pw").value,m=$("lockMsg");
+if(p.length<4){m.textContent="رمز حداقل ۴ حرف باشد";return}
+const h=await sha(p);
+if(!pwHash){try{await DB.collection("config").doc("auth").set({h});pwHash=h}catch(e){m.textContent="ذخیره رمز انجام نشد";return}}
+else if(h!==pwHash){m.textContent="رمز اشتباه است";return}
+$("lockBox").style.display="none";$("teacherPanel").style.display=""}
+const msg=t=>{$("tMsg").textContent=t;setTimeout(()=>{$("tMsg").textContent=""},3000)};
+async function save(col,data){try{await DB.collection(col).doc("d"+Date.now()+Math.floor(Math.random()*999)).set(data);msg("✅ ذخیره شد")}catch(e){msg("⚠️ ذخیره نشد: "+(e.message||e.code))}}
+async function remove(col,id){if(!confirm("حذف شود؟"))return;try{await DB.collection(col).doc(id).delete()}catch(e){msg("⚠️ حذف نشد")}}
+function addWord(){
+const k=$("tK").value.trim(),m=$("tM").value.trim();
+if(!k||!m){msg("کلمه و معنی را وارد کنید");return}
+save("words",{k,m,t:$("tT").value,w:$("tW").value.trim()||"-",n:$("tN").value.trim()||"-",lesson:+$("tL").value||1});
+["tK","tM","tW","tN"].forEach(i=>$(i).value="")}
+function addQA(){
+const q=$("qQ").value.trim(),a=$("qA").value.trim();
+if(!q||!a){msg("سوال و جواب را وارد کنید");return}
+save("qa",{q,a});$("qQ").value="";$("qA").value=""}
+function addExamQ(){
+const q=$("eQ").value.trim(),opts=[0,1,2,3].map(i=>$("o"+i).value.trim());
+if(!q||opts.some(o=>!o)){msg("سوال و هر ۴ گزینه لازم است");return}
+draft.push({q,opts,ans:+$("eC").value});
+["eQ","o0","o1","o2","o3"].forEach(i=>$(i).value="");renderDraft()}
+function renderDraft(){
+$("draft").innerHTML=draft.length?draft.map((q,i)=>`<div class="row"><span>${i+1}. ${esc(q.q)}</span><button class="del" onclick="draft.splice(${i},1);renderDraft()">حذف</button></div>`).join(""):"هنوز سوالی اضافه نشده."}
+function saveExam(){
+const title=$("eT").value.trim();
+if(!title||!draft.length){msg("عنوان و حداقل یک سوال لازم است");return}
+save("exams",{title,questions:draft,ts:Date.now()});draft=[];$("eT").value="";renderDraft()}
+function renderTeacherLists(){
+const L=(arr,col,f)=>arr.map(x=>`<div class="row"><span>${f(x)}</span><button class="del" data-c="${col}" data-i="${esc(x.id)}">حذف</button></div>`).join("")||'<p class="muted">موردی نیست.</p>';
+$("tWords").innerHTML="<p class='muted'>لغات افزوده‌شده:</p>"+L(Object.values(dbWords),"words",x=>`${esc(x.k)} — ${esc(x.m)}`);
+$("tQA").innerHTML="<p class='muted'>سوال‌های ثبت‌شده:</p>"+L(dbQA,"qa",x=>esc(x.q));
+$("tExams").innerHTML="<p class='muted'>آزمون‌های منتشرشده:</p>"+L(dbExams,"exams",x=>`${esc(x.title)} (${x.questions.length} سوال)`);
+document.querySelectorAll("button.del[data-c]").forEach(b=>b.onclick=()=>remove(b.dataset.c,b.dataset.i))}
+
+function listen(col,fn){DB.collection(col).onSnapshot(s=>{fn(s.docs.map(d=>({id:d.id,...d.data()})));},()=>{})}
+function initDb(){
+listen("words",a=>{dbWords={};a.forEach(w=>dbWords[w.id]=w);rebuild();renderTeacherLists()});
+listen("qa",a=>{dbQA=a;renderTeacherLists()});
+listen("exams",a=>{dbExams=a.filter(e=>Array.isArray(e.questions)).sort((x,y)=>(y.ts||0)-(x.ts||0));fillExamSel();renderTeacherLists()})}
+
+fillExamSel();
+(async()=>{
+try{
+if(!window.claude)return;
+const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+if(!db)return;DB=db;initDb();
+if(user&&await user.canEdit()){
+try{const s=await DB.collection("config").doc("auth").get();pwHash=s.exists?s.data().h:null}catch(e){}
+$("lockHint").textContent=pwHash?"رمز خود را وارد کنید.":"اولین ورود: یک رمز برای پنل معلم تعیین کنید (همین رمز ذخیره می‌شود).";
+$("lockBox").style.display="";}
+}catch(e){}
+})();
+</script>
+</body>
+  </html>
