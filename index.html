@@ -277,10 +277,12 @@ addEventListener('beforeunload',e=>{if(EX&&!EX.done){e.preventDefault();e.return
 /* ============ ورود معلم ============ */
 function loginOpen(){if(!SERVER){toast('آدرس Worker هنوز در فایل تنظیم نشده (SERVER)');return}if(admin){openAdmin();return}$('lmsg').textContent='';$('lpw').value='';$('lm').classList.add('on');setTimeout(()=>$('lpw').focus(),50)}
 async function doLogin(silent,pw){
- const p=pw||$('lpw').value;if(!p)return;
- try{const r=await api('/adata',{pass:p});if(!r.ok)throw 0;D=fix(r.data);admin=true;apass=p;sset('ar_pw',p);rebuild();renderExam();
-  $('lm').classList.remove('on');$('fab').style.display='block';$('tlk').textContent='⚙ پنل معلم';if(!silent)openAdmin()}
- catch(e){if(silent){sset('ar_pw',null);return}$('lmsg').textContent='رمز اشتباه است یا سرور در دسترس نیست.'}}
+ const p=(pw||$('lpw').value).trim();if(!p)return;
+ const bad=m=>{if(silent){sset('ar_pw',null);return}$('lmsg').textContent=m};
+ let r;try{r=await api('/adata',{pass:p})}catch(e){bad('پاسخ درستی از Worker نیامد: یا کد جدید Worker گذاشته نشده، یا Binding با نام ARB وصل نیست، یا اینترنت قطع است.');return}
+ if(!r||!r.ok){bad(r&&r.error==='wrong password'?'Worker کار می‌کند ولی رمز با ADMIN_PASS مطابقت ندارد (یا ADMIN_PASS ساخته یا Deploy نشده).':'خطای Worker: '+((r&&r.error)||'نامشخص'));return}
+ D=fix(r.data);admin=true;apass=p;sset('ar_pw',p);rebuild();renderExam();
+ $('lm').classList.remove('on');$('fab').style.display='block';$('tlk').textContent='⚙ پنل معلم';if(!silent)openAdmin()}
 function logout(){admin=false;apass='';sset('ar_pw',null);closeAdmin();$('fab').style.display='none';$('tlk').textContent='🔐 ورود معلم';D=fix(null);rebuild();exSig='';load()}
 function closeAdmin(){$('am').classList.remove('on')}
 
