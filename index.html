@@ -37,6 +37,9 @@ button:disabled{opacity:.5}
 .lessons{display:flex;flex-wrap:wrap;gap:8px}.lessons span{padding:6px 14px;border-radius:20px;background:var(--soft);border:1px solid var(--line);font-size:14px}
 .lessons .soon{opacity:.5;border-style:dashed}
 .seg{display:flex;gap:6px;margin-bottom:10px}.seg button{flex:1;margin:0;background:var(--bg);color:var(--text);border:2px solid var(--line);font-size:14px}.seg button.on{background:var(--secondary);border-color:var(--secondary);color:#fff}
+header{position:relative}.hb{position:absolute;top:12px;left:12px;width:auto;padding:5px 12px;font-size:12px;margin:0;background:rgba(255,255,255,.18)}
+.gate{position:fixed;inset:0;z-index:150;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}.gbox{background:var(--card);width:100%;max-width:380px;border-radius:22px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.or{display:flex;align-items:center;gap:10px;color:#7f8c8d;font-size:12px;margin:10px 0}.or i{flex:1;height:1px;background:var(--line)}
 footer{text-align:center;padding:16px;color:#7f8c8d;font-size:14px}
 .tl{background:none;color:#7f8c8d;width:auto;font-size:12px;text-decoration:underline;margin:6px auto 0;display:block;padding:4px 8px}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;z-index:200;display:none;max-width:90vw}
@@ -70,7 +73,7 @@ details{margin:4px 0 8px;font-size:13px}summary{cursor:pointer;color:var(--secon
 </head>
 <body>
 <div class="container">
-<header><h1>🎓 سامانه هوشمند عربی</h1><p>پایه نهم | مدیریت: محمد حسین نجفی | امیر صادق نصراللهی</p></header>
+<header><button class="hb" id="lo" onclick="logout()" style="display:none">خروج ⏻</button><h1>🎓 سامانه هوشمند عربی</h1><p id="hsub">پایه نهم | مدیریت: محمد حسین نجفی | امیر صادق نصراللهی</p></header>
 
 <div class="section"><h2>📚 درس‌ها</h2>
 <div class="lessons"><span>✅ درس ۱</span><span>✅ درس ۲</span><span class="soon">درس ۳ — به‌زودی</span><span class="soon">درس ۴ — به‌زودی</span><span class="soon">...</span></div>
@@ -96,14 +99,19 @@ details{margin:4px 0 8px;font-size:13px}summary{cursor:pointer;color:var(--secon
 <div class="section"><h2>📝 آزمون</h2><div id="examBox"></div></div>
 
 <footer><p>طراحی شده برای ارائه به استاد گرامی: <strong>آقای عابدینی</strong></p><p>تهیه کننده: <strong>محمد حسین نجفی | امیر صادق نصراللهی</strong></p>
-<button class="tl" id="tlk" onclick="loginOpen()">🔐 ورود معلم</button></footer>
+</footer>
 </div>
 
 <button id="fab" onclick="openAdmin()">⚙ پنل معلم</button>
 <div id="toast"></div>
 
-<div class="ov c" id="lm" onclick="if(event.target===this)this.classList.remove('on')"><div class="lg">
-<h3 style="margin-top:0">🔐 ورود معلم</h3><input id="lpw" type="password" placeholder="رمز معلم" onkeydown="if(event.key==='Enter')doLogin()"><div id="lmsg" class="no" style="min-height:22px;font-size:13px"></div><button onclick="doLogin()">ورود</button></div></div>
+<div class="gate" id="gate"><div class="gbox">
+<div style="font-size:44px;text-align:center">🎓</div><h2 style="border:0;text-align:center;margin-bottom:2px">سامانه هوشمند عربی</h2><p class="muted" style="text-align:center;margin:0 0 14px">پایه نهم — ورود دانش‌آموز</p>
+<input id="sn" placeholder="نام و نام خانوادگی" maxlength="40"><input id="sc" placeholder="کد کلاس (از معلمت بگیر)" autocomplete="off" onkeydown="if(event.key==='Enter')studentEnter()">
+<div id="gmsg" class="no" style="min-height:22px;font-size:13px"></div><button onclick="studentEnter()">ورود به کلاس</button>
+<div class="or"><i></i>یا<i></i></div><button class="g" onclick="guestEnter()">👁 ورود مهمان (فقط لغت‌نامه و تحلیل فعل)</button>
+<button class="tl" onclick="tmOpen(0)">🔐 ورود / ثبت‌نام معلم</button></div></div>
+<div class="ov c" id="tmod" style="z-index:160" onclick="if(event.target===this)this.classList.remove('on')"><div class="lg" style="max-height:92vh;overflow:auto"><h3 style="margin-top:0">🔐 بخش معلم</h3><div id="tmb"></div></div></div>
 <div class="ov" id="am" onclick="if(event.target===this)closeAdmin()"><div class="sh" id="ab2"></div></div>
 
 <script>
@@ -182,8 +190,9 @@ const baseQA=[
 {q:"نحوه پیدا کردن وزن فعل",a:"۱) حروف اضافه (غیر اصلی) فعل را جدا کن تا فقط ۳ حرف اصلی بماند. ۲) به‌جای حرف اول اصلی «ف»، دومی «ع» و سومی «ل» بگذار. ۳) حروف اضافه و حرکات را همان‌طور که هست نگه دار. مثال: كَتَبَ ← فَعَلَ، تَخَرَّجَ ← تَفَعَّلَ، دَرَّسَ ← فَعَّلَ (حرف مشدد = حرف وسط، ع)، آمَنَ ← أَفْعَلَ، نادَى ← فاعَلَ، ابْتَدَأَ ← افْتَعَلَ."}
 ];
 
-/* ============ داده‌های سرور ============ */
-let D=fix(null),admin=false,apass='';
+/* ============ وضعیت و داده‌ها ============ */
+// S.mode: guest | student | teacher | owner
+let S={mode:null,code:'',name:'',tname:'',info:''},D=fix(null),TP=null,OL=null,RS=null,rf='all';
 let dict={},vidx={};
 function rebuild(){dict={};vidx={};
  const add=(k,v)=>{const e={...v,k};dict[norm(k)]=e;if((e.t||'').includes('فعل'))[k,e.n,e.a].forEach(x=>{const n=x&&x!=='-'?norm(String(x).split(/[\/،(]/)[0]):'';if(n)vidx[n]=e})};
@@ -191,9 +200,12 @@ function rebuild(){dict={};vidx={};
  D.words.forEach(w=>add(w.k,{m:w.m,t:w.t||'اسم',w:'-',n:'-',a:'-'}));
  D.verbs.forEach(v=>add(v.k,{m:v.m,t:v.t||'فعل ماضی',w:v.w||'-',n:v.n||'-',a:v.a||'-'}))}
 const hasA=e=>e&&e.a&&e.a!=='-';
-async function load(){
- if(SERVER&&!admin){try{const d=await api('/data?t='+Date.now());if(d&&Array.isArray(d.words)){D=fix(d);lset('ar_cache',JSON.stringify(d))}}catch(e){try{const c=JSON.parse(lget('ar_cache'));if(c)D=fix(c)}catch(_){}}}
- rebuild();renderExam()}
+function setHeader(){
+ const m=S.mode,e=$('hsub');
+ e.textContent=m==='student'?`کلاس ${S.tname} · ${S.name}`:m==='teacher'?`معلم: ${S.tname} · کد کلاس: ${S.code}`:m==='owner'?'حالت سازنده':m==='guest'?'مهمان — فقط لغت‌نامه و تحلیل فعل':'پایه نهم | مدیریت: محمد حسین نجفی | امیر صادق نصراللهی';
+ $('lo').style.display=m?'':'none';
+ $('fab').style.display=(m==='teacher'||m==='owner')?'block':'none';
+ $('fab').textContent=m==='owner'?'⚙ مدیریت کل':'⚙ پنل معلم'}
 
 /* ============ لغت‌نامه ============ */
 function searchWord(){
@@ -229,18 +241,19 @@ let EX=null,exSig='';
 const fmt=s=>fa(Math.floor(s/60))+':'+String(s%60).padStart(2,'0').replace(/\d/g,d=>fa(d));
 const liveExams=()=>D.exams.filter(e=>e.on!==false);
 function renderExam(){
- if(EX)return;const box=$('examBox'),L=liveExams(),sig=JSON.stringify(L.map(e=>[e.id,e.title,e.min,(e.qs||[]).length]));
+ if(EX)return;const box=$('examBox');
+ if(S.mode!=='student'){const sig='m'+S.mode;if(sig===exSig)return;exSig=sig;
+  box.innerHTML=S.mode==='teacher'?'<p class="muted">آزمون‌ها را در «⚙ پنل معلم ← آزمون» بساز و نتیجه را در «نتایج» ببین. دانش‌آموزان با نام و کد کلاس تو وارد می‌شوند.</p>':S.mode==='owner'?'<p class="muted">آزمون‌ها مخصوص دانش‌آموزان هر کلاس است.</p>':'<p class="muted">برای شرکت در آزمون باید با نام و کد کلاس خودت وارد شوی.</p><button onclick="logout()">ورود با کد کلاس</button>';return}
+ const L=liveExams(),sig=JSON.stringify(L.map(e=>[e.id,e.title,e.min,(e.qs||[]).length]));
  if(sig===exSig&&box.innerHTML)return;exSig=sig;
- if(!SERVER||!L.length){box.innerHTML='<p class="muted">فعلاً آزمونی منتشر نشده است.</p>';return}
- const cur=$('examSel')?$('examSel').value:'',nm0=$('stName')?$('stName').value:(lget('ar_name')||'');
- box.innerHTML=`<select id="examSel" onchange="exInfo()">${L.map(e=>`<option value="${esc(e.id)}">${esc(e.title)}</option>`).join('')}</select><div id="exInfo" class="note"></div><input id="stName" placeholder="نام و نام خانوادگی" maxlength="40" value="${esc(nm0)}"><button onclick="startExam()">▶ شروع آزمون</button><div id="exErr" class="no"></div>`;
+ if(!L.length){box.innerHTML='<p class="muted">فعلاً آزمونی از طرف معلمت منتشر نشده است.</p>';return}
+ const cur=$('examSel')?$('examSel').value:'';
+ box.innerHTML=`<select id="examSel" onchange="exInfo()">${L.map(e=>`<option value="${esc(e.id)}">${esc(e.title)}</option>`).join('')}</select><div id="exInfo" class="note"></div><button onclick="startExam()">▶ شروع آزمون</button><div id="exErr" class="no"></div>`;
  if(cur&&L.some(e=>e.id===cur))$('examSel').value=cur;exInfo()}
-function exInfo(){const e=liveExams().find(x=>x.id===$('examSel').value);if(e)$('exInfo').innerHTML=`${fa(e.qs.length)} سوال ۴ گزینه‌ای · ⏱ ${fa(e.min)} دقیقه<br>با زدن «شروع آزمون» تایمر فعال می‌شود. با پایان زمان، پاسخ‌ها خودکار ثبت و کارنامه نمایش داده می‌شود.`}
+function exInfo(){const e=liveExams().find(x=>x.id===$('examSel').value);if(e)$('exInfo').innerHTML=`دانش‌آموز: <b>${esc(S.name)}</b><br>${fa(e.qs.length)} سوال ۴ گزینه‌ای · ⏱ ${fa(e.min)} دقیقه<br>با زدن «شروع آزمون» تایمر فعال می‌شود. با پایان زمان، پاسخ‌ها خودکار ثبت و کارنامه نمایش داده می‌شود.`}
 function startExam(){
- const ex=liveExams().find(x=>x.id===$('examSel').value),name=$('stName').value.trim();
- if(!ex)return;if(name.length<3){$('exErr').textContent='نام و نام خانوادگی را کامل بنویس.';return}
- lset('ar_name',name);const now=Date.now();
- EX={ex,name,ans:ex.qs.map(()=>-1),st:now,end:now+ex.min*60000,done:false};drawQuiz()}
+ const ex=liveExams().find(x=>x.id===$('examSel').value);if(!ex)return;
+ const now=Date.now();EX={ex,name:S.name,ans:ex.qs.map(()=>-1),st:now,end:now+ex.min*60000,done:false};drawQuiz()}
 function drawQuiz(){
  const ex=EX.ex;
  $('examBox').innerHTML=`<div class="tbar" id="tbar"><div><b id="tm">--:--</b> <span class="muted">زمان باقی‌مانده</span></div><div class="muted" id="tc"></div><div class="pbar"><i id="tp"></i></div></div>`+
@@ -262,7 +275,7 @@ async function finishExam(auto){
  sendExam()}
 async function sendExam(){
  EX.sending=true;const b=$('fin');if(b){b.disabled=true;b.textContent='در حال ثبت...'}
- try{const r=await api('/result',{e:EX.ex.id,n:EX.name,a:EX.ans,d:EX.used});EX.sending=false;if(!r.ok)throw 0;showCard(r)}
+ try{const r=await api('/result',{code:S.code,e:EX.ex.id,n:EX.name,a:EX.ans,d:EX.used});EX.sending=false;if(!r.ok)throw 0;showCard(r)}
  catch(e){EX.sending=false;if(b){b.disabled=false;b.textContent='🔁 تلاش دوباره برای ثبت';b.onclick=sendExam}$('exErr').textContent='ثبت انجام نشد (اینترنت یا سرور). پاسخ‌ها حفظ شده‌اند؛ دوباره تلاش کن.'}}
 function showCard(r){
  const ex=EX.ex,p=r.total?Math.round(r.score/r.total*100):0,un=EX.ans.filter(x=>x<0).length,wr=r.total-r.score-un,m=Math.floor(EX.used/60),s=EX.used%60;
@@ -274,26 +287,68 @@ function showCard(r){
  scrollTo({top:$('examBox').offsetTop-20,behavior:'smooth'})}
 addEventListener('beforeunload',e=>{if(EX&&!EX.done){e.preventDefault();e.returnValue=''}});
 
-/* ============ ورود معلم ============ */
-function loginOpen(){if(!SERVER){toast('آدرس Worker هنوز در فایل تنظیم نشده (SERVER)');return}if(admin){openAdmin();return}$('lmsg').textContent='';$('lpw').value='';$('lm').classList.add('on');setTimeout(()=>$('lpw').focus(),50)}
-async function doLogin(silent,pw){
- const p=(pw||$('lpw').value).trim();if(!p)return;
- const bad=m=>{if(silent){sset('ar_pw',null);return}$('lmsg').textContent=m};
- let r;try{r=await api('/adata',{pass:p})}catch(e){bad('پاسخ درستی از Worker نیامد: یا کد جدید Worker گذاشته نشده، یا Binding با نام ARB وصل نیست، یا اینترنت قطع است.');return}
- if(!r||!r.ok){bad(r&&r.error==='wrong password'?'Worker کار می‌کند ولی رمز با ADMIN_PASS مطابقت ندارد (یا ADMIN_PASS ساخته یا Deploy نشده).':'خطای Worker: '+((r&&r.error)||'نامشخص'));return}
- D=fix(r.data);admin=true;apass=p;sset('ar_pw',p);rebuild();renderExam();
- $('lm').classList.remove('on');$('fab').style.display='block';$('tlk').textContent='⚙ پنل معلم';if(!silent)openAdmin()}
-function logout(){admin=false;apass='';sset('ar_pw',null);closeAdmin();$('fab').style.display='none';$('tlk').textContent='🔐 ورود معلم';D=fix(null);rebuild();exSig='';load()}
+/* ============ ورود: دانش‌آموز / مهمان / معلم / سازنده ============ */
+function enter(){$('gate').style.display='none';$('tmod').classList.remove('on');rebuild();exSig='';renderExam();setHeader();scrollTo(0,0)}
+function showGate(){$('gate').style.display='flex';setHeader()}
+async function studentEnter(silent,cr){
+ const code=(cr?cr.code:$('sc').value).trim(),name=(cr?cr.name:$('sn').value).trim(),g=$('gmsg'),bad=m=>{if(!silent)g.textContent=m};
+ if(name.length<2){bad('نام و نام خانوادگی را بنویس.');return}if(!code){bad('کد کلاس را بنویس.');return}
+ let r;try{r=await api('/enter',{code,name})}catch(e){bad('اتصال به سرور برقرار نشد. اینترنت را بررسی کن.');return}
+ if(!r.ok){bad(r.error==='code'?'کد کلاس پیدا نشد. کد را از معلمت بپرس.':'خطا: '+(r.error||''));return}
+ S={mode:'student',code,name,tname:r.data.teacher.name,info:''};lset('ar_s',JSON.stringify({code,name}));D=fix(r.data);g.textContent='';enter()}
+function guestEnter(){S={mode:'guest',code:'',name:'',tname:'',info:''};D=fix(null);enter()}
+function tmOpen(t){ttab=t||0;tmRender();$('tmod').classList.add('on')}
+let ttab=0;
+function tmRender(){
+ const T=['ورود معلم','ثبت‌نام معلم','سازنده'];
+ $('tmb').innerHTML=`<div class="seg">${T.map((x,i)=>`<button class="${i===ttab?'on':''}" onclick="ttab=${i};tmRender()">${x}</button>`).join('')}</div>`+[
+ `<input id="tcode" placeholder="کد کلاس شما" value="${esc(lget('ar_tc')||'')}"><input id="tpass" type="password" placeholder="رمز معلم" onkeydown="if(event.key==='Enter')teacherLogin()"><button onclick="teacherLogin()">ورود</button>`,
+ `<p class="muted" style="margin-top:0">«کد ثبت‌نام معلم» را از سازنده سایت بگیر.</p><input id="rinv" placeholder="کد ثبت‌نام معلم (از سازنده)"><input id="rname" placeholder="نام و نام خانوادگی معلم" maxlength="40"><input id="rinfo" placeholder="مدرسه / کلاس (اختیاری)" maxlength="80"><input id="rcode" placeholder="کد کلاس برای دانش‌آموزان (مثلاً: najafi-9a)"><p class="muted" style="margin:-4px 0 8px">دانش‌آموزانت با نام خودشان و همین کد وارد می‌شوند.</p><input id="rpass" type="password" placeholder="رمز ورود خودت (حداقل ۴ حرف)"><button onclick="teacherRegister()">ثبت‌نام و ورود</button>`,
+ `<input id="opass" type="password" placeholder="رمز سازنده (ADMIN_PASS)" onkeydown="if(event.key==='Enter')ownerLogin()"><button onclick="ownerLogin()">ورود سازنده</button>`][ttab]+`<div id="tmmsg" class="no" style="font-size:13px;min-height:20px"></div><button class="g" onclick="$('tmod').classList.remove('on')">بستن</button>`}
+const tmErr={auth:'کد کلاس یا رمز اشتباه است.',invite:'کد ثبت‌نام معلم اشتباه است.',noinvite:'سازنده هنوز Secret به نام TEACHER_CODE را در Cloudflare نساخته است.',taken:'این کد کلاس قبلاً گرفته شده؛ یکی دیگر انتخاب کن.',name:'نام را کامل بنویس.',code:'کد کلاس حداقل ۳ حرف باشد.',pass:'رمز حداقل ۴ حرف باشد.'};
+const tmFail=(silent,m)=>{if(silent){showGate();return}$('tmmsg').textContent=m};
+async function teacherLogin(silent,cr){
+ const code=(cr?cr.code:$('tcode').value).trim(),pass=cr?cr.pass:$('tpass').value;
+ if(!code||!pass){tmFail(silent,'کد کلاس و رمز را بنویس.');return}
+ let r;try{r=await api('/tdata',{code,pass})}catch(e){tmFail(silent,'پاسخ درستی از Worker نیامد: کد جدید Worker گذاشته نشده یا Binding با نام ARB وصل نیست.');return}
+ if(!r.ok){if(silent)sset('ar_t',null);tmFail(silent,tmErr[r.error]||'خطا: '+(r.error||''));return}
+ S={mode:'teacher',code:r.t.code,name:'',tname:r.t.name,info:r.t.info};TP={code:r.t.code,pass};sset('ar_t',JSON.stringify(TP));lset('ar_tc',r.t.code);D=fix(r.data);enter()}
+async function teacherRegister(){
+ const g=i=>$(i).value.trim(),body={inv:g('rinv'),name:g('rname'),info:g('rinfo'),code:g('rcode'),pass:$('rpass').value};
+ if(!body.inv||!body.name||!body.code||!body.pass){$('tmmsg').textContent='همه فیلدهای ستاره‌دار را پر کن (به‌جز مدرسه).';return}
+ let r;try{r=await api('/register',body)}catch(e){$('tmmsg').textContent='پاسخ درستی از Worker نیامد: کد جدید Worker گذاشته نشده است.';return}
+ if(!r.ok){$('tmmsg').textContent=tmErr[r.error]||'خطا: '+(r.error||'');return}
+ teacherLogin(false,{code:body.code,pass:body.pass})}
+async function ownerLogin(silent,pw){
+ const pass=pw||$('opass').value;if(!pass){tmFail(silent,'رمز را بنویس.');return}
+ let r;try{r=await api('/o/list',{pass})}catch(e){tmFail(silent,'پاسخ درستی از Worker نیامد.');return}
+ if(!r.ok){if(silent)sset('ar_o',null);tmFail(silent,r.error==='auth'?'رمز سازنده اشتباه است (ADMIN_PASS).':'خطا: '+(r.error||''));return}
+ S={mode:'owner',code:'',name:'',tname:'',info:''};TP={pass};OL=r.teachers;sset('ar_o',pass);D=fix(null);enter();if(!silent)openAdmin()}
+function logout(){
+ sset('ar_t',null);sset('ar_o',null);lset('ar_s',null);if(EX&&EX.iv)clearInterval(EX.iv);EX=null;exSig='';
+ S={mode:null,code:'',name:'',tname:'',info:''};TP=null;OL=null;RS=null;D=fix(null);closeAdmin();$('sn').value='';$('sc').value='';$('gmsg').textContent='';rebuild();renderExam();showGate()}
 function closeAdmin(){$('am').classList.remove('on')}
+setInterval(async()=>{if(S.mode!=='student')return;try{const r=await api('/cdata',{code:S.code});if(r.ok){D=fix(r.data);rebuild();renderExam()}else if(r.error==='code'){toast('کد کلاس تغییر کرده یا حذف شده؛ دوباره وارد شو');logout()}}catch(e){}},60000);
+
+/* ============ پنل سازنده ============ */
+function ownerHTML(){const L=OL||[],n=k=>L.reduce((s,t)=>s+(t[k]||0),0);
+ return`<div class="stat"><div><b>${fa(L.length)}</b>معلم</div><div><b>${fa(n('x'))}</b>آزمون</div><div><b>${fa(n('w')+n('v'))}</b>لغت و فعل</div></div>
+ <div class="note">کد ثبت‌نام معلم‌ها از Secret به نام <b>TEACHER_CODE</b> در Cloudflare خوانده می‌شود.</div><button class="b2" onclick="loadOwner()">🔄 بروزرسانی</button>
+ ${L.map(t=>`<div class="fm"><b>${esc(t.n)}</b><div class="muted">${esc(t.i||'')}</div><div class="muted">کد کلاس: <b>${esc(t.c)}</b> · ${fa(t.w||0)} لغت · ${fa(t.q||0)} سوال · ${fa(t.v||0)} فعل · ${fa(t.x||0)} آزمون</div><div class="row" style="border:0"><button class="sm b3" onclick="ownReset('${t.id}')">🔑 رمز جدید</button><button class="del" onclick="ownDel('${t.id}')">حذف معلم</button></div></div>`).join('')||'<p class="muted">هنوز معلمی ثبت‌نام نکرده است.</p>'}`}
+function ownerView(){$('ab2').innerHTML=`<div class="ah"><h3>⚙ مدیریت کل (سازنده)</h3><button class="ib" onclick="closeAdmin()">✕</button></div><div id="ac">${ownerHTML()}</div>`;$('am').classList.add('on')}
+async function loadOwner(){try{const r=await api('/o/list',{pass:TP.pass});if(r.ok){OL=r.teachers;ownerView()}}catch(e){toast('بارگذاری ناموفق بود')}}
+async function ownReset(id){const np=prompt('رمز جدید این معلم (حداقل ۴ حرف):');if(!np)return;try{const r=await api('/o/reset',{pass:TP.pass,id,np});toast(r.ok?'✅ رمز عوض شد':'⚠️ انجام نشد')}catch(e){toast('⚠️ خطای شبکه')}}
+async function ownDel(id){if(!confirm('این معلم با همهٔ لغت‌ها، آزمون‌ها و نتایجش حذف شود؟'))return;try{let r;do{r=await api('/o/del',{pass:TP.pass,id})}while(r.ok&&r.more);toast(r.ok?'✅ حذف شد':'⚠️ انجام نشد');loadOwner()}catch(e){toast('⚠️ خطای شبکه')}}
 
 /* ============ پنل معلم ============ */
-let at='w',aq='',RS=null,rf='all',dr={id:'',t:'',min:10,qs:[]};
-const TABS=[['w','📖','لغت'],['q','💬','سوال'],['v','🔤','فعل'],['x','📝','آزمون'],['r','📊','نتایج'],['p','🔑','رمز']];
+let at='w',aq='',dr={id:'',t:'',min:10,qs:[]};
+const TABS=[['w','📖','لغت'],['q','💬','سوال'],['v','🔤','فعل'],['x','📝','آزمون'],['r','📊','نتایج'],['u','👤','حساب']];
 let sq=Promise.resolve();
 function save(){rebuild();exSig='';renderExam();
- sq=sq.then(()=>api('/save',{pass:apass,data:D})).then(x=>toast(x.ok?'✅ ذخیره شد':'⚠️ ذخیره نشد؛ رمز یا سرور را بررسی کن')).catch(()=>toast('⚠️ خطای شبکه؛ ذخیره نشد'));openAdmin()}
+ sq=sq.then(()=>api('/tsave',{code:TP.code,pass:TP.pass,data:D})).then(x=>toast(x.ok?'✅ ذخیره شد':'⚠️ ذخیره نشد؛ دوباره وارد شو')).catch(()=>toast('⚠️ خطای شبکه؛ ذخیره نشد'));openAdmin()}
 function openAdmin(t){
- if(t)at=t;if(at==='r'&&t==='r')loadRes();
+ if(S.mode==='owner'){ownerView();return}
+ if(t)at=t;if(t==='r')loadRes();
  const sc=$('ac')?$('ac').scrollTop:0;
  $('ab2').innerHTML=`<div class="ah"><h3>⚙ پنل معلم</h3><button class="ib" onclick="closeAdmin()">✕</button></div><div class="at">${TABS.map(x=>`<button class="${x[0]===at?'on':''}" onclick="openAdmin('${x[0]}')"><span>${x[1]}</span>${x[2]}</button>`).join('')}</div><div id="ac">${AP[at]()}</div>`;
  $('am').classList.add('on');$('ac').scrollTop=sc}
@@ -318,7 +373,8 @@ r(){if(!RS)return'<p class="muted">در حال بارگذاری نتایج...</p
  <div class="stat"><div><b>${fa(L.length)}</b>شرکت‌کننده</div><div><b>${fa(avg)}٪</b>میانگین</div><div><b>${fa(L.length?Math.max(...L.map(r=>r.t?Math.round(r.s/r.t*100):0)):0)}٪</b>بالاترین</div></div>
  <div class="row" style="border:0"><button class="sm b2" onclick="loadRes()">🔄 بروزرسانی</button><button class="sm b3" onclick="csv()">⬇ خروجی اکسل (CSV)</button></div>
  ${L.length?`<table><tr><th>نام</th><th>نمره</th><th>درصد</th><th>زمان</th><th></th></tr>${L.map(r=>`<tr><td>${esc(r.n)}<br><small class="muted">${rf==='all'?esc(T(r.e))+' · ':''}${new Date(r.ts).toLocaleString('fa-IR',{dateStyle:'short',timeStyle:'short'})}</small></td><td>${fa(r.s)}/${fa(r.t)}</td><td>${fa(r.t?Math.round(r.s/r.t*100):0)}٪</td><td>${fmt(r.d)}</td><td><button class="del" onclick="delRes('${r.key}')">✕</button></td></tr>`).join('')}</table>`:'<p class="muted">هنوز کسی آزمون نداده است.</p>'}`},
-p(){return`<div class="fm"><b>🔑 تغییر رمز معلم</b><input id="np" type="password" placeholder="رمز جدید (حداقل ۴ حرف)"><button onclick="setPw()">تغییر رمز</button></div><button class="g" onclick="logout()">⏻ خروج از حالت معلم</button><p class="muted">هر تغییری که اینجا بدهی خودکار روی سرور (KV) ذخیره می‌شود و دانش‌آموزان حداکثر یک دقیقه بعد آن را می‌بینند.</p>`}};
+u(){return`<div class="note" style="font-size:15px">🔑 کد کلاس شما: <b style="font-size:20px;letter-spacing:1px">${esc(S.code)}</b><br><span class="muted">این کد را به دانش‌آموزانت بده؛ آن‌ها در صفحه اول با نام خودشان و این کد وارد می‌شوند. لغت‌ها، آزمون‌ها و نتایج هر معلم جداست.</span></div>
+ <div class="fm"><b>👤 اطلاعات و رمزها</b><input id="un" placeholder="نام معلم" value="${esc(S.tname)}"><input id="ui" placeholder="مدرسه / توضیحات" value="${esc(S.info||'')}"><input id="uc" placeholder="کد کلاس جدید (فقط اگر می‌خواهی عوض شود)"><input id="up" type="password" placeholder="رمز معلم جدید (فقط اگر می‌خواهی عوض شود)"><button onclick="saveProf()">ذخیره</button></div><button class="g" onclick="logout()">⏻ خروج</button>`}};
 
 function addWord(){const k=val('wk'),m=val('wm');if(!k||!m){toast('کلمه و معنی را بنویس');return}D.words.unshift({id:uid(),k,m,t:$('wt').value,l:+$('wl').value||1});save()}
 function addQA(){const q=val('qq'),a=val('qa');if(!q||!a){toast('سوال و پاسخ را بنویس');return}D.qa.unshift({id:uid(),q,a});save()}
@@ -330,17 +386,24 @@ function pubExam(){if(!dr.t.trim()||!dr.qs.length){toast('عنوان و حداق
  const i=D.exams.findIndex(x=>x.id===e.id);if(i<0)D.exams.unshift(e);else{e.on=D.exams[i].on;D.exams[i]=e}dr={id:'',t:'',min:10,qs:[]};save()}
 function editEx(id){const e=D.exams.find(x=>x.id===id);if(!e)return;dr={id:e.id,t:e.title,min:e.min,qs:e.qs.map(q=>({...q,o:q.o.slice()}))};openAdmin();$('ac').scrollTop=0}
 function togEx(id){const e=D.exams.find(x=>x.id===id);e.on=e.on===false;save()}
-async function loadRes(){try{const r=await api('/results',{pass:apass});if(r.ok){RS=r.results;if(at==='r')openAdmin()}}catch(e){toast('بارگذاری نتایج ناموفق بود')}}
-async function delRes(k){if(!confirm('این نتیجه حذف شود؟'))return;try{await api('/delres',{pass:apass,keys:[k]});RS=RS.filter(r=>r.key!==k);openAdmin()}catch(e){toast('حذف نشد')}}
+async function loadRes(){try{const r=await api('/tresults',{code:TP.code,pass:TP.pass});if(r.ok){RS=r.results;if(at==='r')openAdmin()}}catch(e){toast('بارگذاری نتایج ناموفق بود')}}
+async function delRes(k){if(!confirm('این نتیجه حذف شود؟'))return;try{await api('/tdelres',{code:TP.code,pass:TP.pass,keys:[k]});RS=RS.filter(r=>r.key!==k);openAdmin()}catch(e){toast('حذف نشد')}}
 function csv(){const L=(RS||[]).filter(r=>rf==='all'||r.e===rf),T=e=>(D.exams.find(x=>x.id===e)||{}).title||'';
  const q=s=>'"'+String(s).replace(/"/g,'""')+'"',rows=[['نام','آزمون','نمره','از','درصد','زمان(ثانیه)','تاریخ'],...L.map(r=>[r.n,T(r.e),r.s,r.t,r.t?Math.round(r.s/r.t*100):0,r.d,new Date(r.ts).toLocaleString('fa-IR')])];
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv;charset=utf-8'}));a.download='results.csv';a.click()}
-async function setPw(){const v=$('np').value;if(v.length<4){toast('رمز حداقل ۴ حرف باشد');return}try{const r=await api('/pw',{pass:apass,np:v});if(!r.ok)throw 0;apass=v;sset('ar_pw',v);toast('✅ رمز عوض شد')}catch(e){toast('تغییر رمز ناموفق بود')}}
+async function saveProf(){
+ const body={code:TP.code,pass:TP.pass,name:val('un'),info:val('ui'),newcode:val('uc'),newpass:$('up').value};
+ try{const r=await api('/tprofile',body);if(!r.ok){toast(tmErr[r.error]||'⚠️ ذخیره نشد');return}
+  TP={code:r.t.code,pass:body.newpass||TP.pass};S={...S,code:r.t.code,tname:r.t.name,info:r.t.info};sset('ar_t',JSON.stringify(TP));lset('ar_tc',TP.code);setHeader();toast('✅ ذخیره شد');openAdmin('u')}
+ catch(e){toast('⚠️ خطای شبکه')}}
 
 /* ============ شروع ============ */
-try{const c=JSON.parse(lget('ar_cache'));if(c)D=fix(c)}catch(e){}
-rebuild();renderExam();
-if(SERVER){load();setInterval(load,60000);const p=sget('ar_pw');if(p)doLogin(true,p)}
+rebuild();renderExam();setHeader();
+try{const s=JSON.parse(lget('ar_s'));if(s){$('sn').value=s.name||'';$('sc').value=s.code||''}}catch(e){}
+(async()=>{
+ const t=sget('ar_t'),o=sget('ar_o'),s=lget('ar_s');
+ try{if(t)await teacherLogin(true,JSON.parse(t));else if(o)await ownerLogin(true,o);else if(s)await studentEnter(true,JSON.parse(s))}catch(e){}
+})();
 </script>
 </body>
 </html>
